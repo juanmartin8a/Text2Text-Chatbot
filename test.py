@@ -76,7 +76,6 @@ data_pairs = load_data_pairs('conversations.txt')
 
 vocab_frequency = vocab_frequency(data_pairs)
 vocab = vocab(vocab_frequency)
-vocab.append('<unk>')
 vocab_size = len(vocab) + 1
 
 data_pairs = clean(data_pairs, vocab)
@@ -90,8 +89,8 @@ input_tensor_train, input_tensor_val, target_tensor_train, target_tensor_val = t
 buffer_size = len(input_tensor_train)
 batch_size = 64
 steps_per_epoch = len(input_tensor_train)
-embedding_dim = 720
-units = 3070
+embedding_dim = 360
+units = 1535
 
 dataset = tf.data.Dataset.from_tensor_slices((input_tensor_train, target_tensor_train)).shuffle(buffer_size)
 dataset = dataset.batch(batch_size, drop_remainder=True)
@@ -102,15 +101,16 @@ class Encoder(tf.keras.Model):
     self.batch_size = batch_size
     self.enc_units = enc_units
     self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
-    self.gru = tf.keras.layers.GRU(self.enc_units, return_sequences=True, return_state=True, recurrent_initializer='glorot_uniform')
+    self.gru = tf.keras.layers.Bidirectional(tf.keras.layers.GRU(self.enc_units, return_sequences=True, return_state=True, recurrent_initializer='glorot_uniform'))
 
-  def call(self, x, hidden):
+  def call(self, x, hidden): #x is the input
     x = self.embedding(x)
-    output, state = self.gru(x, initial_state=hidden)
+    output, forward_h, backward_h = self.gru(x, initial_state=hidden)
+    state = tf.concat([forward_h, backward_h], 1)
     return output, state
 
   def init_hidden_state(self):
-    return tf.zeros((self.batch_size, self.enc_units))
+    return [tf.zeros((self.batch_size, self.enc_units)) for i in range(2)]
 
 class BahdanauAttention(tf.keras.layers.Layer):
   def __init__(self, units):
@@ -119,12 +119,13 @@ class BahdanauAttention(tf.keras.layers.Layer):
     self.W2 = tf.keras.layers.Dense(units)
     self.V = tf.keras.layers.Dense(1)
 
-  def call(self, query, values):
+  def call(self, query, values): #query is refered as the hidden states
     query_with_time_axis = tf.expand_dims(query, 1)
     score = self.V(tf.nn.tanh(self.W1(query_with_time_axis) + self.W2(values)))
+    #score = query_with_time_axis(self.W(values))
     attention_weights = tf.nn.softmax(score, axis=1)
     context_vector = attention_weights * values
-    context_vector = tf.reduce_sum(context_vector, axis=1)
+    context_vector = tf.reduce_sum(context_vector, axis=1) #sum of elements
 
     return attention_weights, context_vector
 
@@ -134,7 +135,8 @@ class Decoder(tf.keras.Model):
     self.batch_size = batch_size
     self.dec_units = dec_units
     self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
-    self.gru = tf.keras.layers.GRU(self.dec_units, return_sequences=True, return_state=True, recurrent_initializer='glorot_uniform')
+    # for bidirectional rnn 
+    self.gru = tf.keras.layers.Bidirectional(tf.keras.layers.GRU(self.dec_units, return_sequences=True, return_state=True, recurrent_initializer='glorot_uniform'))
     self.fc = tf.keras.layers.Dense(vocab_size)
     self.attention = BahdanauAttention(self.dec_units)
 
@@ -142,7 +144,9 @@ class Decoder(tf.keras.Model):
     attention_weights, context_vector = self.attention(dec_hidden, enc_output)
     dec_input = self.embedding(dec_input)
     dec_input = tf.concat([tf.expand_dims(context_vector, 1), dec_input], axis=-1)
-    output, state = self.gru(dec_input)
+    #output, state = self.gru(dec_input)
+    output, forward_h, backward_h = self.gru(dec_input)
+    state = tf.concat([forward_h, backward_h], 1)
     output = tf.reshape(output, (-1, output.shape[2]))
     dec_input = self.fc(output)
 
@@ -154,7 +158,7 @@ decoder = Decoder(vocab_size, embedding_dim, units, batch_size)
 #testing
 #restore checkpoint
 optimizer = tf.keras.optimizers.Adam()
-checkpoint_dir = './training_checkpoints_uni'
+checkpoint_dir = './training_checkpoints_bi'
 checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
 checkpoint = tf.train.Checkpoint(optimizer=optimizer, encoder=encoder, decoder=decoder)
 checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
@@ -210,7 +214,7 @@ def evaluate(sentence):
   inputs = tf.keras.preprocessing.sequence.pad_sequences([inputs], maxlen=max_length, padding='post')
   inputs = tf.convert_to_tensor(inputs)
   result = ''
-  hidden = [tf.zeros((1, units))]
+  hidden = [tf.zeros((1, units)) for i in range(2)]
   enc_out, enc_hidden = encoder(inputs, hidden)
   dec_hidden = enc_hidden
   dec_input = tf.expand_dims([target_tokenizer.word_index['<start>']], 0)
@@ -220,6 +224,7 @@ def evaluate(sentence):
     result += target_tokenizer.index_word[predicted_id] + ' '
     if target_tokenizer.index_word[predicted_id] == '<end>':
       return result, sentence
+    # the predicted ID is fed back into the model
     dec_input = tf.expand_dims([predicted_id], 0)
   return result, sentence
 
@@ -237,4 +242,3 @@ try:
         print('Reply: ' + reply)
 except KeyboardInterrupt:
     print('chat has stopped')
-
