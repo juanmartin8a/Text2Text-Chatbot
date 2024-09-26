@@ -2,7 +2,7 @@
 This Artificial Neural Network (ANN) can generate responses to user inputs. You can chat with it! :O
 
 ## Model Architecture
-  The model works with an encoder and decoder:
+  The model works with an encoder-decoder architecture:
   - ### Encoder
 
     The encoder processes the input sentence and encodes it into a high-dimensional vector (context vector). This implementation uses a Bidirectional Gated Recurrent Unit (GRU) to capture information from both past and future words in the input sequence.
@@ -14,7 +14,7 @@ This Artificial Neural Network (ANN) can generate responses to user inputs. You 
 ## Dataset
 The model was trained on a modified version of the Cornell Movie Dialogs Corpus, which contains over 220,000 conversational exchanges between more than 10,000 pairs of movie characters. This dataset provides a rich source of conversational data suitable for training a conversational AI model.
 
-The dataset was modified to reduce its size and to make training more simple.
+The dataset was modified to reduce its size and make training more simple.
 
 You can find the modified version of the dataset in the [conversations.txt file](https://github.com/juanmartin8a/Text2Text-Chatbot/blob/main/conversations.txt) from this repo :)
 
