@@ -19,7 +19,7 @@ The dataset was modified to reduce its size and make training more simple.
 You can find the modified version of the dataset in the [conversations.txt file](https://github.com/juanmartin8a/Text2Text-Chatbot/blob/main/conversations.txt) from this repo :)
 
 ## Model Workflow
-  1. ### Data pre-processing
+  1. ### Data Pre-processing
       The conversational data is cleaned and tokenized. During training, words that appear less than a specified threshold are filtered out to reduce the vocabulary size.
 
   2. ### Inference
