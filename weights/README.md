@@ -1,4 +1,4 @@
-# Model Wights
+# Model Weights
 This directory is for storing the model weights :D
 
 ## Instructions
