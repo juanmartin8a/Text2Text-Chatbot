@@ -1,15 +1,15 @@
 # Text to Text Chatbot
 This Artificial Neural Network (ANN) can generate responses to user inputs. You can chat with it! :O
-
-## Model Architecture
+## Model
   The model works with an encoder-decoder architecture:
+  
   - ### Encoder
-
     The encoder processes the input sentence and encodes it into a high-dimensional vector (context vector). This implementation uses a Bidirectional Gated Recurrent Unit (GRU) to capture information from both past and future words in the input sequence.
 
   - ### Decoder
-  
     The decoder generates the response using the context vector from the encoder. It uses the Bahdanau Attention mechanism to focus on relevant parts of the input sentence during the generation of each word in the output sequence. The decoder is also built using a Bidirectional GRU network.
+
+The model was trained using the GPUs provided by Google Colab's free tier. This significantly limited the amount of time and compute power.
 
 ## Dataset
 The model was trained on a modified version of the Cornell Movie Dialogs Corpus, which contains over 220,000 conversational exchanges between more than 10,000 pairs of movie characters. This dataset provides a rich source of conversational data suitable for training a conversational AI model.
@@ -42,6 +42,5 @@ You can find the modified version of the dataset in the [conversations.txt file]
 
 ## Disclaimer
 There are a few things to note about this model:
-  - The model was trained using the GPUs provided by Google Colab's free tier. This significantly limited the amount of time and compute power.
   - Because of the way the model was trained to save resources, the model can only read the current user input to generate a response so it doesn't have memory of previous user inputs :/ . This could be improved by training the model with the complete movie characters dialog instead of only an input and response per dialog.
   - The model could also improve by having a better vocabulary (more tokens).
