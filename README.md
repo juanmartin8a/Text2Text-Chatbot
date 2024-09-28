@@ -12,7 +12,7 @@ This Artificial Neural Network (ANN) can generate responses to user inputs. You 
 The model was trained using the GPUs provided by Google Colab's free tier. This significantly limited the amount of time and compute power.
 
 ## Dataset
-The model was trained on a modified version of the Cornell Movie Dialogs Corpus, which contains over 220,000 conversational exchanges between more than 10,000 pairs of movie characters. This dataset provides a rich source of conversational data suitable for training a conversational AI model.
+The model was trained on a modified version of the [Cornell Movie Dialogs Corpus](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html), which contains over 220,000 conversational exchanges between more than 10,000 pairs of movie characters. This dataset provides a rich source of conversational data suitable for training a conversational AI model.
 
 The dataset was modified to reduce its size and make training more simple.
 
