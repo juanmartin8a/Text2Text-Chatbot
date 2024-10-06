@@ -1,4 +1,7 @@
 # Text to Text Chatbot
+![Started](https://img.shields.io/badge/Started-Dec%202020-blue%20green.svg)
+![Last Updated](https://img.shields.io/badge/Last%20Updated-Jan%202021-blue.svg?color=informational)
+
 This Artificial Neural Network (ANN) can generate responses to user inputs. You can chat with it! :O
 ## Model
   The model works with an encoder-decoder architecture:
